@@ -19,13 +19,9 @@ std::ofstream openFileAppend(){
 }
 
 template <typename T>
-void printArray(const std::vector<T> &target, bool newline = true){
+void printArray(const std::vector<T> &target){
     for(auto it = target.begin(); it != target.end(); ++it){
         std::cout << *it;
-    }
-    // adds new line for next row
-    if(newline){
-        std::cout << std::endl;
     }
 }
 
@@ -68,6 +64,9 @@ void GameBoard::moveRow(int row){
     int IndexThree = 4;
     // start going to right
     bool addorsub = true;
+
+    int count = 0; // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
+    
     // set game pieces to start in middle
     rowTarget[IndexOne] = 1;
     rowTarget[IndexTwo] = 1;
@@ -75,11 +74,11 @@ void GameBoard::moveRow(int row){
 
     // print original starting point
     if(GameBoard::getDebug()) std::cout << "Row " << row << ": ";
-    printArray(rowTarget, false);
+    printArray(rowTarget);
     std::cout << std::flush;
 
 
-    while(true){
+    while(count !=15){
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         // clear only the moving pieces from the current row
@@ -93,9 +92,11 @@ void GameBoard::moveRow(int row){
 
         std::cout << '\r';
         if(GameBoard::getDebug()) std::cout << "Row " << row << ": ";
-        printArray(rowTarget, false);
+        printArray(rowTarget);
         std::cout << std::flush;
+        count++;
     }
+    std::cout << std::endl;
 }
 
 // this function actively changes the first 4 parameters

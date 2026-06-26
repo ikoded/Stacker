@@ -11,8 +11,9 @@ int main(){
     GameBoard gameBoard;
     gameBoard.clearGameBoard();
     gameBoard.setDebug(false);
-    gameBoard.moveRow(0);
-    this_thread::sleep_for(chrono::seconds(20));
+    for(int i = 0; i < 12; i++){
+        gameBoard.moveRow(i);
+    }
     gameBoard.clearGameBoard();
 
 
