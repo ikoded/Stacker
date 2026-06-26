@@ -3,6 +3,8 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <cstdlib>
+#include <ctime>
 
 /*
 
@@ -54,6 +56,24 @@ void GameBoard::startGame(){
     
 }
 
+// in future will be able to pass how big board is
+void GameBoard::initializeGameBoard(){
+    GameBoard::gameboard = {
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0}
+        };
+}
+
 // this function is for moving any row you are currently on
 void GameBoard::moveRow(int row){
     // Initial variables
@@ -65,8 +85,14 @@ void GameBoard::moveRow(int row){
     // start going to right
     bool addorsub = true;
 
-    int count = 0; // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
-    
+    // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
+    srand(time(0));
+
+    int randgoal = rand() % 25;
+
+    int count = 0;
+    // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
+
     // set game pieces to start in middle
     rowTarget[IndexOne] = 1;
     rowTarget[IndexTwo] = 1;
@@ -77,8 +103,8 @@ void GameBoard::moveRow(int row){
     printArray(rowTarget);
     std::cout << std::flush;
 
-
-    while(count !=15){
+    // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
+    while(count != randgoal){
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         // clear only the moving pieces from the current row
@@ -128,18 +154,9 @@ void GameBoard::indexMove(int &indexone, int &indextwo, int &indexthree, bool &a
 
 void GameBoard::clearGameBoard(){
     GameBoard::gameboard.clear();
-    GameBoard::gameboard = {
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0}
-    };
+    initializeGameBoard();
+}
+
+GameBoard::GameBoard(){
+    initializeGameBoard(); // sets board to size right away
 }
