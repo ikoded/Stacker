@@ -10,8 +10,8 @@ int main(){
 
     GameBoard gameBoard;
     gameBoard.clearGameBoard();
+    gameBoard.setDebug(false);
     gameBoard.moveRow(0);
-    gameBoard.createRow();
     this_thread::sleep_for(chrono::seconds(20));
     gameBoard.clearGameBoard();
 

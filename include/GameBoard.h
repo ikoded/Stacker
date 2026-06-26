@@ -4,16 +4,9 @@
 
 class GameBoard{
     public:
-        void displayMenu();
-        void dispayScoreBoard();
+        void setDebug(bool value);
+        bool getDebug();
         void startGame();
-        // creation of brick in file
-        void createTopBottom(char characterChoice); // top bottom of boxes
-        void createSides(); // sides of boxes
-        // creation of row of bricks in file
-        void createRow();
-        // proccess gameboard
-        void processGameBoard();
         // move row left and right
         void moveRow(int row);
         void indexMove(int &indexone, int &indextwo, int &indexthree, bool &addorsub, int row);
@@ -34,4 +27,7 @@ class GameBoard{
             {0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0}
         };
+
+    private:
+        bool DEBUG;
 };
