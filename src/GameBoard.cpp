@@ -3,8 +3,7 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
-#include <cstdlib>
-#include <ctime>
+#include <conio.h>
 
 /*
 
@@ -38,6 +37,14 @@ void GameBoard::setDebug(bool value){
 
 bool GameBoard::getDebug(){
     return GameBoard::DEBUG;
+}
+
+void GameBoard::setPassRow(bool value){
+    GameBoard::passRow.store(value);
+}
+
+bool GameBoard::getPassRow(){
+    return GameBoard::passRow.load();
 }
 
 /*
@@ -76,6 +83,7 @@ void GameBoard::initializeGameBoard(){
 
 // this function is for moving any row you are currently on
 void GameBoard::moveRow(int row){
+    setPassRow(false);
     // Initial variables
     std::vector<int> &rowTarget = this->gameboard[row];
     // game pieces start in the middle
@@ -85,26 +93,16 @@ void GameBoard::moveRow(int row){
     // start going to right
     bool addorsub = true;
 
-    // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
-    srand(time(0));
-
-    int randgoal = rand() % 25;
-
-    int count = 0;
-    // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
-
     // set game pieces to start in middle
     rowTarget[IndexOne] = 1;
     rowTarget[IndexTwo] = 1;
     rowTarget[IndexThree] = 1;
 
-    // print original starting point
-    if(GameBoard::getDebug()) std::cout << "Row " << row << ": ";
-    printArray(rowTarget);
-    std::cout << std::flush;
-
-    // TEMP MAKE IT TRIGGER ON INPUT EVENT (MULTITHREADING)
-    while(count != randgoal){
+    while(!getPassRow()){
+        std::cout << '\r';
+        if(GameBoard::getDebug()) std::cout << "Row " << row << ": ";
+        printArray(rowTarget);
+        std::cout << std::flush;
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         // clear only the moving pieces from the current row
@@ -115,14 +113,9 @@ void GameBoard::moveRow(int row){
         rowTarget[IndexOne] = 1;
         rowTarget[IndexTwo] = 1;
         rowTarget[IndexThree] = 1;
-
-        std::cout << '\r';
-        if(GameBoard::getDebug()) std::cout << "Row " << row << ": ";
-        printArray(rowTarget);
-        std::cout << std::flush;
-        count++;
     }
     std::cout << std::endl;
+    setPassRow(false);
 }
 
 // this function actively changes the first 4 parameters
@@ -148,6 +141,20 @@ void GameBoard::indexMove(int &indexone, int &indextwo, int &indexthree, bool &a
             indexone--;
             indextwo--;
             indexthree--;
+        }
+    }
+}
+
+// 
+void GameBoard::getUserInput(){
+    while (true) {
+        if (_kbhit()) { // a key was pressed
+            char c = _getch(); // get the key immediately
+            if(GameBoard::getDebug()) std::cout << "Pressed: " << c << '\n';
+            if (c == 'x') {
+                setPassRow(true);
+                break;
+            }
         }
     }
 }
