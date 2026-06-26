@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -std=c++20 -I./include
 
 SOURCES = src/main.cpp src/GameBoard.cpp src/Player.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-EXECUTABLE = menu.exe
+EXECUTABLE = stacker.exe
 
 all : $(EXECUTABLE)
 
