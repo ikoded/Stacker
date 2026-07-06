@@ -24,7 +24,7 @@ class GameBoard{
         bool getPassRow();
         // vector used for comparing if user messed up
         // private so it does not become manipulated on accident
-        void setLastRow();
+        void setLastRow(std::vector<int> row);
         std::vector<int> getLastRow();
         // rows used in game
         void setRows(int rows);
@@ -51,10 +51,17 @@ class GameBoard{
         */
         // initalize gameboard
         void initializeGameBoard();
+        
         // move row left and right
         // indexMove is helper function for border logic
         void moveRow(int row);
+        void grabIndices(int &indexone, int &indextwo, int &indexthree, std::vector<int> &rowList); // grabs indices in row
         void indexMove(int &indexone, int &indextwo, int &indexthree, bool &addorsub, int row);
+        bool helperMove(int &indexone, int &indextwo,int &indexthree, bool addorsub, int row); // helper if 3 indices
+        bool helperMove(int &indexone, int &indextwo, bool addorsub, int row); // helper if 2 indices
+        bool helperMove(int &indexone, bool addorsub, int row); // helper if 1 index
+        
+        bool compareUserBricks(std::vector<int> pastRow, int row);
         // loop over how ever many rows set
         void loopRows();
         // get user input for each row (ran in second thread)
@@ -74,7 +81,7 @@ class GameBoard{
         bool DEBUG;
         std::atomic<bool> passRow{false};
         int rows = 12;
-        std::vector<int> pastRow();
+        std::vector<int> pastRow;
         // gameboard, potenitally make it private
         std::vector<std::vector<int>> gameboard;
 };
