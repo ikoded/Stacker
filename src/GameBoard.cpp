@@ -236,25 +236,27 @@ void GameBoard::indexMove(int &indexone, int &indextwo, int &indexthree, bool &a
     }
 
     // none of them have fallen so call three index helper move
-    addorsub = helperMove(indexone, indextwo, indexthree, addorsub, row); // move all 3
+    if(indexone<8&&indextwo<8&&indexthree<8){
+        addorsub = helperMove(indexone, indextwo, indexthree, addorsub, row); // move all 3
+    }
 
 }
 
 // Move logic with three indices
 bool GameBoard::helperMove(int &indexone, int &indextwo,int &indexthree, bool addorsub, int row){
     int size = this->gameboard[row].size();
-    if(addorsub){ // adding
+    if(addorsub){ // move right
         if(indexthree==(size-1)){ // hit right wall
-            addorsub = false; // set to subtract
-        }else{ // move right
+            addorsub = false; // change directions
+        }else{ 
             indexone++;
             indextwo++;
             indexthree++;
         }
-    }else{ // subtracting
+    }else{ // move left
         if(indexone==0){ // hit left wall
-            addorsub = true; // set to add
-        }else{ // move left
+            addorsub = true; // change directions
+        }else{
             indexone--;
             indextwo--;
             indexthree--;
@@ -275,7 +277,7 @@ bool GameBoard::helperMove(int &indexone, int &indextwo, bool addorsub, int row)
         }
     }else{ // subtracting
         if(indexone==0){ // hit left wall
-            addorsub = true;
+            addorsub = true; // change directions
         }else{ // move left
             indexone--;
             indextwo--;
@@ -287,15 +289,15 @@ bool GameBoard::helperMove(int &indexone, int &indextwo, bool addorsub, int row)
 // Move logic with one index
 bool GameBoard::helperMove(int &indexone, bool addorsub, int row){
     int size = this-> gameboard[row].size();
-    if(addorsub){
+    if(addorsub){ // move right
         if(indexone==(size-1)){ // hit right wall
             addorsub = false;
-        }else{ // move right
+        }else{ 
             indexone++;
         }
-    }else{
-        if(indexone==0){
-            addorsub = true;
+    }else{ // move left
+        if(indexone==0){ // hit left wall
+            addorsub = true; // change directions
         }else{
             indexone--;
         }
@@ -304,59 +306,112 @@ bool GameBoard::helperMove(int &indexone, bool addorsub, int row){
     return addorsub;
 }
 
-// compare if the user brick fell where first bricks fell
-bool GameBoard::compareUserBricks(std::vector<int> pastRow, int row){
-    std::vector<int> currentRow = gameboard[row];
+// compare user bricks to the last row
+bool GameBoard::compareUserBricks(std::vector<int> &pastRow, int row){
+    bool check = true; // default to true
+
+    std::vector<int> currentRow = gameboard[row]; // grab current row
     // setup indices for current row
-    int IndexOne = 69 , IndexTwo = 69, IndexThree = 69; //set to 69 to show index not set yet 
-    grabIndices(IndexOne,IndexTwo,IndexThree,currentRow);
+    int IndexOne = 69 , IndexTwo = 69, IndexThree = 69; //set to 69 to allow for dynamic indices sizes
+    grabIndices(IndexOne,IndexTwo,IndexThree,currentRow); // these indices are for current row
     // setup indices for past row
-    int PastIndexOne = 69, PastIndexTwo = 69, PastIndexThree = 69;
-    grabIndices(PastIndexOne,PastIndexTwo,PastIndexThree,pastRow);
+    int PastIndexOne = 69, PastIndexTwo = 69, PastIndexThree = 69; //set to 69 to allow for dynamic indices sizes
+    grabIndices(PastIndexOne,PastIndexTwo,PastIndexThree,pastRow); // these indices are for past row
 
-    if(IndexOne==69){
-        if(IndexTwo==69){ // both right side indices are not there
-            if(IndexThree!=PastIndexThree){
-                return false; // this means they did not align
-            }else{
-                return true; // this means they did align
-            }
+    // set diffrow to 69 to start
+    int diffrowone = 69, diffrowtwo = 69, diffrowthree = 69;
+
+    // if past rows indices not 69, then set the diffrow for index by subtracting
+    // these will all be the same if 3 or 2 bricks, of course if 2 bricks one index will be 69 (fell off)
+    // if all 1 that means it fell to right
+    // if all -1 that means it fell to left
+    if(PastIndexOne!=69) diffrowone = IndexOne - PastIndexOne;
+    if(PastIndexTwo!=69) diffrowtwo = IndexTwo - PastIndexTwo;
+    if(PastIndexThree!=69) diffrowthree = IndexThree - PastIndexThree;
+
+    // check how many bricks in play
+    int sizebricks = 0;
+    // add if difference exists (dynamic amount of bricks)
+    if(diffrowone!=69) sizebricks++;
+    if(diffrowtwo!=69) sizebricks++;
+    if(diffrowthree!=69) sizebricks++;
+
+    switch(sizebricks){ // based on how many bricks left
+        case 0: { // game over (should never get here)
+            check = false;
+            break;
         }
-        if(IndexTwo!=PastIndexTwo) return false; // did not line up
-        if(IndexThree!=PastIndexThree) return false; // did not line up
-    }
-
-    if(IndexThree==69){
-        if(IndexTwo==69){
-            if(IndexOne!=PastIndexOne){
-                return false; // this means the last index sis not align
+        case 1: { // 1 brick left
+            if(diffrowone==0||diffrowtwo==0||diffrowthree==0){ // passed
             } else{
-                return true;
+                // game over (this is usually what will end the game when getting to 1 brick)
+                check = false;
             }
+            break;
         }
-        if(IndexTwo!=PastIndexTwo) return false; // did not line up
-        if(IndexOne!=PastIndexOne) return false; // did not line up
+        case 2: { // 2 bricks left
+            if(diffrowone==0||diffrowtwo==0||diffrowthree==0){ // passed
+            } else if(diffrowone==1||diffrowtwo==1||diffrowthree==1){ // lost a right brick
+                if(diffrowone==1){ // this means the middle and left are the only bricks [(1,2),3]
+                    GameBoard::gameboard[row].at(IndexTwo) = 0; // take off right most brick
+                }else if (diffrowthree==1){ // this means right and middle are the only bricks [1,(2,3)]
+                    GameBoard::gameboard[row].at(IndexThree) = 0; // take off right most brick
+                } else { // all fell off board this means
+                    check = false;
+                }
+            } else if (diffrowone==-1||diffrowtwo==-1||diffrowthree==-1){ // lost a left brick
+                if(diffrowone==-1){ // this means the middle and left are the only bricks [(1,2),3]
+                    GameBoard::gameboard[row].at(IndexOne) = 0; // take off left most brick
+                }else if (diffrowthree==-1){ // this means right and middle are the only bricks [1,(2,3)]
+                    GameBoard::gameboard[row].at(IndexTwo) = 0; // take off left most brick
+                } else{ // all fell off board this means
+                    check = false;
+                }
+            }
+            break;
+        }
+        case 3: { // 3 bricks left
+            if(diffrowone==0||diffrowtwo==0||diffrowthree==0){ // passed
+            } else if(diffrowone==1||diffrowtwo==1||diffrowthree==1){ // lost a right brick
+                GameBoard::gameboard[row].at(IndexThree) = 0; // take off right most brick
+            } else if (diffrowone==-1||diffrowtwo==-1||diffrowthree==-1){ // lost a left brick
+                GameBoard::gameboard[row].at(IndexOne) = 0; // take off left most brick
+            } else{ // game over
+                check = false;
+            }
+            break;
+        }
+        default: {
+            // shouldn't ever get here, if it did error program
+            break;
+        }
     }
 
-    return true;
+    if(IndexOne==69&&IndexTwo==69&&IndexThree==69){ // game over since all off board, realistically this was caught earlier in logic
+        check = false;
+    }
+    return check;
+
 }
 
 // loop through moving rows and using multi thread to capture and print
 void GameBoard::loopRows(){
-    int rows = getRows();
+    int rows = getRows(); // how many rows user will play, can change this in setting menu
     bool check;
     std::vector<int> &pastRow = GameBoard::pastRow;
     for(int i = 0; i < rows; i++){
         std::thread inputThread(&GameBoard::getUserInput, this);
-        moveRow(i);
-        inputThread.join();
+        moveRow(i); // run displaying rows ("move" bricks in row this means)
+        inputThread.join(); // wait for user input thread to complete
         if(i!=0){
-            check = compareUserBricks(pastRow,i);
+            check = compareUserBricks(pastRow, i);
             if(!check){
                 std::cout << "Game Lost!" << std::endl;
+                // TODO: Calculate Player Score
                 break;
             }
         }
+        // set pastRow where this current row ended since this row was manipulated if brick fell off
         pastRow = gameboard[i];
     }
 }
@@ -368,6 +423,7 @@ void GameBoard::getUserInput(){
         if (_kbhit()) { // a key was pressed
             char c = _getch(); // get the key immediately
             if (c == 'x') {
+                // row has "passed" which is used for multi thread to tell display loop to stop
                 setPassRow(true);
                 break;
             }

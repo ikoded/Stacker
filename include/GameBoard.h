@@ -7,6 +7,7 @@
 #include <chrono> // used for ms/seconds sleeping a thread
 #include <thread> // used for grabbing user input while displaying game
 #include <conio.h> // used for get user input method 
+#include <algorithm>
 
 class GameBoard{
     public:
@@ -61,7 +62,7 @@ class GameBoard{
         bool helperMove(int &indexone, int &indextwo, bool addorsub, int row); // helper if 2 indices
         bool helperMove(int &indexone, bool addorsub, int row); // helper if 1 index
         
-        bool compareUserBricks(std::vector<int> pastRow, int row);
+        bool compareUserBricks(std::vector<int> &pastRow, int row);
         // loop over how ever many rows set
         void loopRows();
         // get user input for each row (ran in second thread)
