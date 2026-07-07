@@ -6,8 +6,7 @@
 #include <fstream> // used for files of player data like scoreboards (WIP)
 #include <chrono> // used for ms/seconds sleeping a thread
 #include <thread> // used for grabbing user input while displaying game
-#include <conio.h> // used for get user input method 
-#include <algorithm>
+#include <conio.h> // used for get user input method
 
 class GameBoard{
     public:

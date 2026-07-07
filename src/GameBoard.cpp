@@ -170,20 +170,21 @@ void GameBoard::moveRow(int row){
     // the passRow variable is a class member of gameboard that is used by both threads to check if to keep going foward
     while(!getPassRow()){
         // order matters, this logic must happen first to show board correctly
-        // clear only the moving pieces from the current row
+        // clear only the existing pieces from the current row
         if(IndexOne!=69) rowTarget[IndexOne] = 0;
         if(IndexTwo!=69) rowTarget[IndexTwo] = 0;
         if(IndexThree!=69) rowTarget[IndexThree] = 0;
 
         indexMove(IndexOne,IndexTwo,IndexThree,addorsub,row); // logic that checks where to move and moves them
 
+        // "moved" index one left or right depending on location, this updates the row
         if(IndexOne!=69) rowTarget[IndexOne] = 1;
         if(IndexTwo!=69) rowTarget[IndexTwo] = 1;
         if(IndexThree!=69) rowTarget[IndexThree] = 1;
 
         std::cout << '\r'; // move to beginning of line
-        printArray(rowTarget); // display array as it is now
-        std::cout << std::flush;
+        printArray(rowTarget); // display row with update of move, this is how it is animated
+        std::cout << std::flush; // flush all changes
         std::this_thread::sleep_for(std::chrono::milliseconds(100)); // this will make it harder or easier, going to add different difficulties with this
     }
     setPassRow(false); // set passRow to false for next one
@@ -415,7 +416,7 @@ void GameBoard::loopRows(){
             }
             std::cout << '\r'; // move to beginning of line
             printArray(rowTarget); // update display of row in case something fell
-            std::cout << std::flush;
+            std::cout << std::flush; // flush all changes
         }
         // new line for new row
         std::cout << std::endl;
