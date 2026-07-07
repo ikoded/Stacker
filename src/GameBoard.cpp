@@ -135,22 +135,21 @@ void GameBoard::startGame(){
 // in future will be able to pass how big board is
 void GameBoard::initializeGameBoard(){
     int rows = GameBoard::getRows();
-    GameBoard::gameboard.clear();
-    GameBoard::gameboard.resize(rows);
+    GameBoard::gameboard.clear(); // clear it
+    GameBoard::gameboard.resize(rows); // resize with exact rows set
     for(int i = 0; i < rows; i++){
-        GameBoard::gameboard[i] = {0,0,0,0,0,0,0}; 
+        GameBoard::gameboard[i] = {0,0,0,0,0,0,0}; // set each row in the vector of vector ints
     }
 }
 
 // this function is for moving any row you want to move
-// WIP ADD FUNCTIONALITY FOR DYNAMIC AMOUNT OF INDICES
 void GameBoard::moveRow(int row){
-    setPassRow(false);
+    setPassRow(false); // just make sure row does not pass right away
     // Initial variables
     std::vector<int> &rowTarget = this->gameboard[row];
     
     int IndexOne = 69 , IndexTwo = 69, IndexThree = 69;  //set to 69 to show index not set yet 
-    if(row==0){
+    if(row==0){ // first row starts in same place
         IndexOne = 2;
         IndexTwo = 3;
         IndexThree = 4;
@@ -160,7 +159,7 @@ void GameBoard::moveRow(int row){
     }
     
     // start going to right every row
-    // could randomize this
+    // could randomize this every row with 0-1 random gen
     bool addorsub = true;
 
     // set indices if available
@@ -168,7 +167,7 @@ void GameBoard::moveRow(int row){
     if(IndexTwo!=69) rowTarget[IndexTwo] = 1;
     if(IndexThree!=69) rowTarget[IndexThree] = 1;
     
-    
+    // the passRow variable is a class member of gameboard that is used by both threads to check if to keep going foward
     while(!getPassRow()){
         // order matters, this logic must happen first to show board correctly
         // clear only the moving pieces from the current row
@@ -176,23 +175,23 @@ void GameBoard::moveRow(int row){
         if(IndexTwo!=69) rowTarget[IndexTwo] = 0;
         if(IndexThree!=69) rowTarget[IndexThree] = 0;
 
-        indexMove(IndexOne,IndexTwo,IndexThree,addorsub,row);
+        indexMove(IndexOne,IndexTwo,IndexThree,addorsub,row); // logic that checks where to move and moves them
 
         if(IndexOne!=69) rowTarget[IndexOne] = 1;
         if(IndexTwo!=69) rowTarget[IndexTwo] = 1;
         if(IndexThree!=69) rowTarget[IndexThree] = 1;
 
         std::cout << '\r'; // move to beginning of line
-        printArray(rowTarget);
+        printArray(rowTarget); // display array as it is now
         std::cout << std::flush;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // this will make it harder or easier, going to add different difficulties with this
     }
-    std::cout << std::endl;
-    setPassRow(false);
+    setPassRow(false); // set passRow to false for next one
 }
 
+// this function grabs and updates each indice with the respective index if available
 void GameBoard::grabIndices(int &indexone, int &indextwo, int &indexthree, std::vector<int> &rowList){
-    int size = rowList.size();
+    int size = rowList.size(); // size of row in case row changes
     for(int i = 0; i < size; i++){
         int col = rowList[i];
         if(col==1){ // index found
@@ -350,8 +349,8 @@ bool GameBoard::compareUserBricks(std::vector<int> &pastRow, int row){
             break;
         }
         case 2: { // 2 bricks left
-            if(diffrowone==0||diffrowtwo==0||diffrowthree==0){ // passed
-            } else if(diffrowone==1||diffrowtwo==1||diffrowthree==1){ // lost a right brick
+            if((diffrowone==0&&diffrowtwo==0)||(diffrowthree==0&&diffrowtwo==0)){ // passed
+            } else if((diffrowone==1&&diffrowtwo==1)||(diffrowthree==1&&diffrowtwo==1)){ // lost a right brick
                 if(diffrowone==1){ // this means the middle and left are the only bricks [(1,2),3]
                     GameBoard::gameboard[row].at(IndexTwo) = 0; // take off right most brick
                 }else if (diffrowthree==1){ // this means right and middle are the only bricks [1,(2,3)]
@@ -359,7 +358,7 @@ bool GameBoard::compareUserBricks(std::vector<int> &pastRow, int row){
                 } else { // all fell off board this means
                     check = false;
                 }
-            } else if (diffrowone==-1||diffrowtwo==-1||diffrowthree==-1){ // lost a left brick
+            } else if ((diffrowone==-1&&diffrowtwo==-1)||(diffrowthree==-1&&diffrowtwo==-1)){ // lost a left brick
                 if(diffrowone==-1){ // this means the middle and left are the only bricks [(1,2),3]
                     GameBoard::gameboard[row].at(IndexOne) = 0; // take off left most brick
                 }else if (diffrowthree==-1){ // this means right and middle are the only bricks [1,(2,3)]
@@ -367,6 +366,8 @@ bool GameBoard::compareUserBricks(std::vector<int> &pastRow, int row){
                 } else{ // all fell off board this means
                     check = false;
                 }
+            } else { // all fell off board this means
+                check = false;
             }
             break;
         }
@@ -397,9 +398,11 @@ bool GameBoard::compareUserBricks(std::vector<int> &pastRow, int row){
 // loop through moving rows and using multi thread to capture and print
 void GameBoard::loopRows(){
     int rows = getRows(); // how many rows user will play, can change this in setting menu
+    
     bool check;
     std::vector<int> &pastRow = GameBoard::pastRow;
     for(int i = 0; i < rows; i++){
+        std::vector<int> &rowTarget = this->gameboard[i];
         std::thread inputThread(&GameBoard::getUserInput, this);
         moveRow(i); // run displaying rows ("move" bricks in row this means)
         inputThread.join(); // wait for user input thread to complete
@@ -410,7 +413,12 @@ void GameBoard::loopRows(){
                 // TODO: Calculate Player Score
                 break;
             }
+            std::cout << '\r'; // move to beginning of line
+            printArray(rowTarget); // update display of row in case something fell
+            std::cout << std::flush;
         }
+        // new line for new row
+        std::cout << std::endl;
         // set pastRow where this current row ended since this row was manipulated if brick fell off
         pastRow = gameboard[i];
     }
