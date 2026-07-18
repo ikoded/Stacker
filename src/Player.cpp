@@ -1,7 +1,7 @@
 #include "../include/Player.h"
 
 void Player::setUserScore(int score){
-    Player::userScore = score;
+    userScore = score;
 }
 
 void Player::addToUserScore(int score){
