@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++20 -I./include
+CXXFLAGS = -std=c++23 -Wall -Wextra -Wpedantic -Werror
 
 SOURCES = src/main.cpp src/GameBoard.cpp src/Player.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
