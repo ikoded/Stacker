@@ -1,4 +1,5 @@
 #include "../include/GameBoard.h"
+#include "../include/Player.h"
 
 #define NAME_OF(x) #x // used for getting variable name listing rules out
 
@@ -85,6 +86,24 @@ void gameMenu(){
     std::cout << "1. Start Game\n2. Change difficulty\n3. Exit\nPlease enter a choice 1-3: ";
 }
 
+// reroute for playing game again
+bool playAgain(){
+    std::string answer;
+    std::cout << "Would you like to play again (y/n)? ";
+    std::cin >> answer;
+    if(answer=="y") return true;
+
+    return false;
+}
+
+std::string askPlayerForName(){
+    std::string name;
+    std::cout << "Please enter your name for player leaderboards: ";
+    std::cin >> name;
+
+    return name;
+}
+
 // start game with menu options
 void GameBoard::startGame(){
     clearSTDOUT();
@@ -96,12 +115,20 @@ void GameBoard::startGame(){
         switch(choice){
             // Start game
             case '1':{
+                Player player; // create player object
+                std::string name = askPlayerForName();
+                player.setPlayerName(name);
+                std::cout << "Player name set to " << player.getPlayerName() << std::endl;
                 std::cout << "Starting Game";
                 sleepAnimation();
-                loopRows(); // loop rows of game
-                if(getDebug()){
-                    debugMethod();
+                int score = loopRows(); // loop rows of game
+                player.addToUserScore((score-1)*100); // add score - 1 because completing first row does not mean 100 points
+                while(playAgain()){ // play until user wants to exit
+                    int score = loopRows();
+                    player.addToUserScore((score-1)*100);
                 }
+                player.addToLeaderboard();
+
                 clearSTDOUT(); // clear terminal
                 break;
             }
@@ -397,12 +424,13 @@ bool GameBoard::compareUserBricks(std::vector<int> &pastRow, int row){
 }
 
 // loop through moving rows and using multi thread to capture and print
-void GameBoard::loopRows(){
+int GameBoard::loopRows(){
     int rows = getRows(); // how many rows user will play, can change this in setting menu
     
     bool check;
+    int i;
     std::vector<int> &pastRow = this->pastRow;
-    for(int i = 0; i < rows; i++){
+    for(i = 0; i < rows; i++){
         std::vector<int> &rowTarget = this->gameboard[i];
         std::thread inputThread(&getUserInput, this);
         moveRow(i); // run displaying rows ("move" bricks in row this means)
@@ -410,6 +438,7 @@ void GameBoard::loopRows(){
         if(i!=0){
             check = compareUserBricks(pastRow, i);
             if(!check){
+                std::cout << std::endl;
                 std::cout << "Game Lost!" << std::endl;
                 // TODO: Calculate Player Score
                 break;
@@ -423,6 +452,10 @@ void GameBoard::loopRows(){
         // set pastRow where this current row ended since this row was manipulated if brick fell off
         pastRow = gameboard[i];
     }
+
+    // return int i which is how many rows the user got (0-11 by default)
+
+    return i;
 }
 
 // grab users input if key presses x

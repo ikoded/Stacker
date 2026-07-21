@@ -63,7 +63,7 @@ class GameBoard{
         
         bool compareUserBricks(std::vector<int> &pastRow, int row);
         // loop over how ever many rows set
-        void loopRows();
+        int loopRows();
         // get user input for each row (ran in second thread)
         void getUserInput();
         // change rules of game, consists of:
